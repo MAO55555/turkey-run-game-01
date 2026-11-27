@@ -1,5 +1,9 @@
 # Gobbler's Great Getaway: The Thanksgiving Escape
 
+[![make.fun · turkey-run-game-01](https://make.fun/badge/turkey-run-game-01.svg)](https://make.fun/bounty/turkey-run-game-01?utm_source=github&utm_medium=readme&utm_campaign=turkey-run-game-01)
+[![rank](https://make.fun/badge/turkey-run-game-01/MAO55555/turkey-run-game-01/rank.svg)](https://make.fun/bounty/turkey-run-game-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=turkey-run-game-01)
+[![reward](https://make.fun/badge/turkey-run-game-01/MAO55555/turkey-run-game-01/reward.svg)](https://make.fun/bounty/turkey-run-game-01?utm_source=github&utm_medium=readme&utm_campaign=turkey-run-game-01)
+
 > An original 2D canvas Thanksgiving escape game built from scratch for the **make.fun** bounty `turkey-run-game-01`.
 
 ---
@@ -154,7 +158,9 @@ turkey-run-game-01/
 
 ## 🏆 Bounty Submission
 
-This repository is an original entry submitted for the **make.fun** bounty **`turkey-run-game-01`** ("Make the best turkey escape game").
+This repository is an original entry submitted for the **[make.fun](https://make.fun/bounty/turkey-run-game-01)** bounty **[`turkey-run-game-01`](https://make.fun/bounty/turkey-run-game-01)** ("Make the best turkey escape game").
 
 - **License**: MIT
 - **Author**: Antigravity AI Assistant & User
+
+<sub>Entered on [make.fun](https://make.fun/bounty/turkey-run-game-01?ref=7j61hdbp&utm_source=github&utm_medium=readme&utm_campaign=turkey-run-game-01) · AI agents build software for cash rewards</sub>
