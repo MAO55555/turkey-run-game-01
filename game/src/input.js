@@ -1,53 +1,121 @@
-// Keyboard and pointer input. Held keys give a steering direction; one-shot presses (start or
-// restart, pause) are queued as bit flags and taken once by the loop, so a press between two
-// frames is never lost and never counted twice.
+// Input controller handling keyboard, mouse, and coordinate transformation for 1280x720 canvas.
 
-export const ACTION_CONFIRM = 1;
-export const ACTION_PAUSE = 2;
+export function createInput(canvas, view) {
+  const keys = new Map();
+  const justPressed = new Set();
+  let mouseX = 0;
+  let mouseY = 0;
+  let mouseClicked = false;
+  let mouseJustClicked = false;
 
-const LEFT = new Set(['ArrowLeft', 'KeyA']);
-const RIGHT = new Set(['ArrowRight', 'KeyD']);
-const CONFIRM = new Set(['Space', 'Enter']);
-const PAUSE = new Set(['KeyP', 'Escape']);
+  function updateMouseCoords(evt) {
+    const rect = canvas.getBoundingClientRect();
+    const clickPxX = (evt.clientX - rect.left) * (canvas.width / rect.width);
+    const clickPxY = (evt.clientY - rect.top) * (canvas.height / rect.height);
+    const vScale = view && view.scale ? view.scale : 1;
+    const vX = view && view.x !== undefined ? view.x : 0;
+    const vY = view && view.y !== undefined ? view.y : 0;
+    mouseX = (clickPxX - vX) / vScale;
+    mouseY = (clickPxY - vY) / vScale;
+  }
 
-export function createInput(target) {
-  let left = false;
-  let right = false;
-  let actions = 0;
+  function onKeyDown(evt) {
+    // Prevent scrolling with arrows/space
+    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyS', 'KeyA', 'KeyD'].includes(evt.code)) {
+      evt.preventDefault();
+    }
+    if (!keys.get(evt.code)) {
+      justPressed.add(evt.code);
+    }
+    keys.set(evt.code, true);
+  }
 
-  window.addEventListener('keydown', (event) => {
-    if (LEFT.has(event.code)) left = true;
-    else if (RIGHT.has(event.code)) right = true;
-    else if (CONFIRM.has(event.code)) {
-      if (!event.repeat) actions |= ACTION_CONFIRM;
-    } else if (PAUSE.has(event.code)) {
-      if (!event.repeat) actions |= ACTION_PAUSE;
-    } else return;
-    event.preventDefault();
-  });
-  window.addEventListener('keyup', (event) => {
-    if (LEFT.has(event.code)) left = false;
-    else if (RIGHT.has(event.code)) right = false;
-  });
-  // A key released while the tab is hidden never sends keyup: let go of everything on blur.
-  window.addEventListener('blur', () => {
-    left = false;
-    right = false;
-  });
-  target.addEventListener('pointerdown', () => {
-    actions |= ACTION_CONFIRM;
-  });
+  function onKeyUp(evt) {
+    keys.set(evt.code, false);
+  }
+
+  function onMouseMove(evt) {
+    updateMouseCoords(evt);
+  }
+
+  function onMouseDown(evt) {
+    updateMouseCoords(evt);
+    mouseClicked = true;
+    mouseJustClicked = true;
+  }
+
+  function onMouseUp() {
+    mouseClicked = false;
+  }
+
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
+  canvas.addEventListener('mousemove', onMouseMove);
+  canvas.addEventListener('mousedown', onMouseDown);
+  window.addEventListener('mouseup', onMouseUp);
 
   return {
-    /** -1 for left, 1 for right, 0 for neither or both. */
-    direction() {
-      return (right ? 1 : 0) - (left ? 1 : 0);
+    isDown(code) {
+      return !!keys.get(code);
     },
-    /** The one-shot presses since the last call, as ACTION_* flags. */
-    takeActions() {
-      const taken = actions;
-      actions = 0;
-      return taken;
+    wasJustPressed(code) {
+      return justPressed.has(code);
+    },
+
+    // Intent helpers
+    isLeft() {
+      return this.isDown('ArrowLeft') || this.isDown('KeyA');
+    },
+    isRight() {
+      return this.isDown('ArrowRight') || this.isDown('KeyD');
+    },
+    isJump() {
+      return this.isDown('Space') || this.isDown('ArrowUp') || this.isDown('KeyW');
+    },
+    wasJumpJustPressed() {
+      return this.wasJustPressed('Space') || this.wasJustPressed('ArrowUp') || this.wasJustPressed('KeyW');
+    },
+    isSlide() {
+      return this.isDown('ArrowDown') || this.isDown('KeyS');
+    },
+    wasSlideJustPressed() {
+      return this.wasJustPressed('ArrowDown') || this.wasJustPressed('KeyS');
+    },
+    isHide() {
+      return this.isDown('KeyE') || this.isDown('ArrowDown') || this.isDown('KeyS');
+    },
+    wasHideJustPressed() {
+      return this.wasJustPressed('KeyE');
+    },
+    wasDecoyJustPressed() {
+      return this.wasJustPressed('KeyF') || mouseJustClicked;
+    },
+    wasPauseJustPressed() {
+      return this.wasJustPressed('KeyP') || this.wasJustPressed('Escape');
+    },
+    wasMuteJustPressed() {
+      return this.wasJustPressed('KeyM');
+    },
+    wasRestartJustPressed() {
+      return this.wasJustPressed('KeyR') || this.wasJustPressed('Space') || this.wasJustPressed('Enter');
+    },
+
+    getMouse() {
+      return { x: mouseX, y: mouseY, isDown: mouseClicked, justClicked: mouseJustClicked };
+    },
+
+    // Clear frame-specific triggers at end of tick
+    postUpdate() {
+      justPressed.clear();
+      mouseJustClicked = false;
+    },
+
+    destroy() {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      canvas.removeEventListener('mousemove', onMouseMove);
+      canvas.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mouseup', onMouseUp);
     },
   };
 }
