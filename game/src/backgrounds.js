@@ -655,52 +655,82 @@ export function createBackgrounds() {
     // ==========================================
     drawGround(ctx, width, height, groundY, scrollX, theme) {
       if (theme === 'kitchen') {
-        // True Perspective Checkered Floor (shrinking towards back, darker towards foreground)
+        // True Perspective Checkered Floor (converging to vanishing point, shrinking towards counter, darker towards bottom)
         const totalH = height - groundY;
-        const rows = 9;
+        const vpX = width / 2; // 640
+        const vpY = groundY - 140; // 430
+        const distBottom = height - vpY; // 290
+        const rows = 8;
+        const colWBottom = 68;
+        const offset = ((scrollX * 0.45) % colWBottom + colWBottom) % colWBottom;
 
+        // Draw quadrilateral tiles row by row from back to front
         for (let r = 0; r < rows; r++) {
-          // Perspective depth progress: 0 at back (groundY), 1 at bottom (height)
-          const p1 = r / rows;
-          const p2 = (r + 1) / rows;
-          // Exponential perspective spacing: smaller in distance, larger up close
-          const y1 = groundY + Math.pow(p1, 1.35) * totalH;
-          const y2 = groundY + Math.pow(p2, 1.35) * totalH;
-          const rowHeight = y2 - y1;
+          const t1 = Math.pow(r / rows, 1.8);
+          const t2 = Math.pow((r + 1) / rows, 1.8);
+          const y1 = groundY + t1 * totalH;
+          const y2 = groundY + t2 * totalH;
 
-          // Tile width also expands with perspective
-          const tileW = 28 + p1 * 34;
-          const offset = (scrollX * (0.8 + p1 * 0.4)) % (tileW * 2);
+          const ratio1 = (y1 - vpY) / distBottom;
+          const ratio2 = (y2 - vpY) / distBottom;
 
-          for (let x = -offset - tileW * 2; x < width + tileW * 2; x += tileW) {
-            const col = Math.floor((x + offset) / tileW);
-            const isWhite = (col + r) % 2 === 0;
+          // Muted warm tile colours: cream and terracotta
+          const creamColor = r % 2 === 0 ? '#EFE4D6' : '#E8DDD0';
+          const terracottaColor = r % 2 === 0 ? '#965545' : '#88493B';
 
-            // Shaded perspective: tiles get darker towards bottom, avoiding harsh contrast
-            if (isWhite) {
-              const lum = Math.floor(226 - p1 * 60);
-              ctx.fillStyle = `rgb(${lum}, ${lum + 2}, ${lum + 6})`;
-            } else {
-              const lum = Math.floor(36 - p1 * 22);
-              ctx.fillStyle = `rgb(${lum}, ${lum + 2}, ${lum + 8})`;
-            }
-            ctx.fillRect(x, y1, tileW + 1, rowHeight + 1);
+          // Span from offscreen-left to offscreen-right
+          const minCol = Math.floor((-vpX) / (colWBottom * ratio2)) - 2;
+          const maxCol = Math.ceil((width - vpX) / (colWBottom * ratio2)) + 2;
+
+          for (let c = minCol; c <= maxCol; c++) {
+            const isCream = ((c + r) % 2 + 2) % 2 === 0;
+            ctx.fillStyle = isCream ? creamColor : terracottaColor;
+
+            const x1L = vpX + (c * colWBottom - offset) * ratio1;
+            const x1R = vpX + ((c + 1) * colWBottom - offset) * ratio1;
+            const x2R = vpX + ((c + 1) * colWBottom - offset) * ratio2;
+            const x2L = vpX + (c * colWBottom - offset) * ratio2;
+
+            ctx.beginPath();
+            ctx.moveTo(x1L, y1);
+            ctx.lineTo(x1R, y1);
+            ctx.lineTo(x2R, y2);
+            ctx.lineTo(x2L, y2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Subtle grout line between tiles
+            ctx.strokeStyle = 'rgba(60, 30, 20, 0.15)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
           }
         }
 
-        // Perspective shadow overlay towards bottom of screen
-        const floorShadow = ctx.createLinearGradient(0, groundY, 0, height);
-        floorShadow.addColorStop(0, 'rgba(0, 0, 0, 0.05)');
-        floorShadow.addColorStop(0.5, 'rgba(0, 0, 0, 0.22)');
-        floorShadow.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
-        ctx.fillStyle = floorShadow;
+        // Darkening gradient overlay toward the bottom edge
+        const floorDarken = ctx.createLinearGradient(0, groundY, 0, height);
+        floorDarken.addColorStop(0, 'rgba(25, 12, 8, 0.02)');
+        floorDarken.addColorStop(0.45, 'rgba(25, 12, 8, 0.25)');
+        floorDarken.addColorStop(1, 'rgba(15, 6, 4, 0.62)');
+        ctx.fillStyle = floorDarken;
         ctx.fillRect(0, groundY, width, totalH);
 
+        // Soft warm reflections of the 3 ceiling lamp pools on the floor
+        for (let lx of [220, 560, 960]) {
+          const lampGlow = ctx.createRadialGradient(lx, groundY + 45, 10, lx, groundY + 55, 140);
+          lampGlow.addColorStop(0, 'rgba(254, 240, 138, 0.28)');
+          lampGlow.addColorStop(0.45, 'rgba(245, 158, 11, 0.10)');
+          lampGlow.addColorStop(1, 'rgba(245, 158, 11, 0)');
+          ctx.fillStyle = lampGlow;
+          ctx.beginPath();
+          ctx.ellipse(lx, groundY + 55, 140, 48, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
         // Top Floor Kickplate / Molding
-        ctx.fillStyle = '#475569';
+        ctx.fillStyle = '#452015';
         ctx.fillRect(0, groundY, width, 5);
-        ctx.fillStyle = '#1E293B';
-        ctx.fillRect(0, groundY + 5, width, 2);
+        ctx.fillStyle = '#B45309';
+        ctx.fillRect(0, groundY, width, 2);
       } else if (theme === 'farm') {
         // Natural Dirt Path with rich dark earth texture
         const dirtGrad = ctx.createLinearGradient(0, groundY, 0, height);

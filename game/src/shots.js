@@ -155,7 +155,7 @@ export function stageShot(name, world) {
       flying: true,
       rot: 0.12,
       x: 480,
-      y: FIELD.groundY - 78,
+      y: FIELD.groundY - 86,
       width: 58,
       height: 25,
       scoredCloseShave: true,

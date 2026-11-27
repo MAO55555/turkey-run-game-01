@@ -266,6 +266,8 @@ export function createRenderer(canvas) {
 
     drawTurkeySliding(turkey) {
       ctx.save();
+      ctx.scale(1.3, 1.3);
+      ctx.translate(0, -5);
 
       // 1. Full Fanned Tail Feathers (Tucked & Streaming Behind in Autumn Bands)
       const tailColors = [PALETTE.deepBrown, PALETTE.cranberry, PALETTE.pumpkin, PALETTE.mustard, PALETTE.warmCream];
@@ -813,30 +815,46 @@ export function createRenderer(canvas) {
         ctx.fillRect(0, 12, obs.width, 8);
         ctx.fillRect(0, obs.height - 20, obs.width, 8);
       } else {
-        // Banquet Dining Table with draped autumn tablecloth
+        // Banquet Kitchen Dining Table with thick tabletop & draped autumn cloth
+        // Solid wooden tabletop
+        ctx.fillStyle = '#5D3A2C';
+        ctx.fillRect(0, 0, obs.width, 10);
+        ctx.strokeStyle = '#3E2723';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(0, 0, obs.width, 10);
+
+        // Draped tablecloth
         ctx.fillStyle = PALETTE.cranberry;
-        ctx.fillRect(0, 0, obs.width, 28);
+        ctx.fillRect(4, 10, obs.width - 8, 22);
         ctx.fillStyle = '#F59E0B';
-        ctx.fillRect(0, 28, obs.width, 5); // gold cloth fringe
+        ctx.fillRect(4, 32, obs.width - 8, 5); // gold cloth fringe
+
         // Table legs
         ctx.fillStyle = '#3E2723';
-        ctx.fillRect(6, 33, 10, obs.height - 33);
-        ctx.fillRect(obs.width - 16, 33, 10, obs.height - 33);
+        ctx.fillRect(8, 37, 10, obs.height - 37);
+        ctx.fillRect(obs.width - 18, 37, 10, obs.height - 37);
       }
 
-      // Hide indicator prompt badge (NO EMOJI)
-      ctx.fillStyle = 'rgba(26, 18, 11, 0.9)';
+      // Wooden mounting bracket firmly attaching badge to table top
+      ctx.fillStyle = '#78350F';
+      ctx.fillRect(obs.width / 2 - 4, -8, 8, 10);
+      ctx.strokeStyle = '#451A03';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(obs.width / 2 - 4, -8, 8, 10);
+
+      // Hide indicator prompt badge attached directly above table
+      ctx.fillStyle = 'rgba(26, 18, 11, 0.95)';
       ctx.strokeStyle = PALETTE.gold;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(obs.width / 2 - 38, -28, 76, 22, 6);
+      ctx.roundRect(obs.width / 2 - 38, -30, 76, 22, 6);
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = '#FFFFFF';
       ctx.font = '900 11px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('[E] HIDE', obs.width / 2, -13);
+      ctx.fillText('[E] HIDE', obs.width / 2, -15);
     },
 
     drawRollingPin(obs) {

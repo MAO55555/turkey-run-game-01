@@ -597,18 +597,19 @@ export function createScreens() {
       ctx.restore();
 
       // 3. Banquet Table Surface (y: tableY to FIELD.height)
-      // Linen tablecloth gradient
+      // Warm Linen tablecloth with gradient
       const tableGrad = ctx.createLinearGradient(0, tableY, 0, FIELD.height);
       tableGrad.addColorStop(0, '#FFFBEB');
-      tableGrad.addColorStop(0.3, '#FEF3C7');
-      tableGrad.addColorStop(1, '#FDE68A');
+      tableGrad.addColorStop(0.35, '#FDE68A');
+      tableGrad.addColorStop(0.75, '#F59E0B');
+      tableGrad.addColorStop(1, '#D97706');
       ctx.fillStyle = tableGrad;
       ctx.fillRect(0, tableY, FIELD.width, FIELD.height - tableY);
 
-      // Damask jacquard diamond weave pattern on tablecloth
-      ctx.strokeStyle = 'rgba(217, 119, 6, 0.10)';
-      ctx.lineWidth = 1;
-      for (let d = -FIELD.height; d < FIELD.width; d += 32) {
+      // Clearly visible diamond weave / jacquard plaid pattern in warm orange/terracotta
+      ctx.strokeStyle = 'rgba(180, 83, 9, 0.32)';
+      ctx.lineWidth = 2.5;
+      for (let d = -FIELD.height; d < FIELD.width + 400; d += 36) {
         ctx.beginPath();
         ctx.moveTo(d, tableY);
         ctx.lineTo(d + 400, tableY + 400);
@@ -616,6 +617,22 @@ export function createScreens() {
         ctx.beginPath();
         ctx.moveTo(d + 400, tableY);
         ctx.lineTo(d, tableY + 400);
+        ctx.stroke();
+      }
+
+      // Secondary fine plaid check lines
+      ctx.strokeStyle = 'rgba(234, 88, 12, 0.22)';
+      ctx.lineWidth = 1.5;
+      for (let tx = 0; tx < FIELD.width; tx += 36) {
+        ctx.beginPath();
+        ctx.moveTo(tx, tableY);
+        ctx.lineTo(tx, FIELD.height);
+        ctx.stroke();
+      }
+      for (let ty = tableY; ty < FIELD.height; ty += 28) {
+        ctx.beginPath();
+        ctx.moveTo(0, ty);
+        ctx.lineTo(FIELD.width, ty);
         ctx.stroke();
       }
 
@@ -637,6 +654,31 @@ export function createScreens() {
       // Silver Candelabra on far left
       const canX = 85;
       const canY = tableY + 60;
+
+      // Soft warm radial candle-glow gradient on tablecloth surface
+      const candleTableGlow = ctx.createRadialGradient(canX + 30, canY - 20, 15, canX + 220, canY + 120, 520);
+      candleTableGlow.addColorStop(0, 'rgba(254, 240, 138, 0.60)');
+      candleTableGlow.addColorStop(0.35, 'rgba(245, 158, 11, 0.30)');
+      candleTableGlow.addColorStop(0.7, 'rgba(217, 119, 6, 0.12)');
+      candleTableGlow.addColorStop(1, 'rgba(217, 119, 6, 0)');
+      ctx.fillStyle = candleTableGlow;
+      ctx.fillRect(0, tableY, FIELD.width, FIELD.height - tableY);
+
+      // Rich table shading gradient toward bottom edge
+      const tableShade = ctx.createLinearGradient(0, tableY + 80, 0, FIELD.height);
+      tableShade.addColorStop(0, 'rgba(69, 26, 3, 0)');
+      tableShade.addColorStop(0.5, 'rgba(69, 26, 3, 0.24)');
+      tableShade.addColorStop(1, 'rgba(42, 15, 8, 0.60)');
+      ctx.fillStyle = tableShade;
+      ctx.fillRect(0, tableY + 80, FIELD.width, FIELD.height - (tableY + 80));
+
+      // Drop shadows under candelabra and dishes
+      ctx.fillStyle = 'rgba(30, 10, 5, 0.38)';
+      ctx.beginPath();
+      ctx.ellipse(canX, canY + 16, 36, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Candelabra metal body
       ctx.fillStyle = '#CBD5E1';
       ctx.fillRect(canX - 4, canY - 50, 8, 50);
       ctx.fillRect(canX - 25, canY - 30, 50, 6);
@@ -646,14 +688,6 @@ export function createScreens() {
       ctx.fillRect(canX - 25, canY - 65, 4, 20);
       ctx.fillRect(canX - 2, canY - 70, 4, 20);
       ctx.fillRect(canX + 21, canY - 65, 4, 20);
-
-      // Radial candle glow spreading across the banquet table
-      const candleTableGlow = ctx.createRadialGradient(canX, canY - 60, 15, canX + 200, canY + 100, 420);
-      candleTableGlow.addColorStop(0, 'rgba(254, 240, 138, 0.28)');
-      candleTableGlow.addColorStop(0.4, 'rgba(245, 158, 11, 0.12)');
-      candleTableGlow.addColorStop(1, 'rgba(245, 158, 11, 0)');
-      ctx.fillStyle = candleTableGlow;
-      ctx.fillRect(0, tableY, FIELD.width, FIELD.height - tableY);
 
       // Candle flames
       for (let fx of [canX - 23, canX, canX + 23]) {
@@ -669,10 +703,12 @@ export function createScreens() {
       }
 
       // Golden Gravy Boat with ladle at x = 165, y = 585
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
+      // Drop shadow
+      ctx.fillStyle = 'rgba(30, 10, 5, 0.38)';
       ctx.beginPath();
-      ctx.ellipse(175, 595, 50, 14, 0, 0, Math.PI * 2);
+      ctx.ellipse(175, 604, 56, 16, 0, 0, Math.PI * 2);
       ctx.fill();
+
       ctx.fillStyle = '#D97706';
       ctx.beginPath();
       ctx.ellipse(175, 582, 50, 20, 0, 0, Math.PI * 2);
@@ -688,10 +724,12 @@ export function createScreens() {
       ctx.fill();
 
       // Autumn Roast Veggies Platter at x = 430, y = 595
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      // Drop shadow
+      ctx.fillStyle = 'rgba(30, 10, 5, 0.38)';
       ctx.beginPath();
-      ctx.ellipse(430, 606, 68, 18, 0, 0, Math.PI * 2);
+      ctx.ellipse(430, 614, 76, 20, 0, 0, Math.PI * 2);
       ctx.fill();
+
       ctx.fillStyle = '#E2E8F0';
       ctx.beginPath();
       ctx.ellipse(430, 595, 68, 22, 0, 0, Math.PI * 2);
@@ -710,10 +748,12 @@ export function createScreens() {
       ctx.fillRect(436, 576, 26, 7);
 
       // Large Pumpkin Pie with whipped cream swirl at x = 625, y = 590
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      // Drop shadow
+      ctx.fillStyle = 'rgba(30, 10, 5, 0.38)';
       ctx.beginPath();
-      ctx.ellipse(625, 602, 60, 18, 0, 0, Math.PI * 2);
+      ctx.ellipse(625, 608, 66, 18, 0, 0, Math.PI * 2);
       ctx.fill();
+
       ctx.fillStyle = '#92400E';
       ctx.beginPath();
       ctx.ellipse(625, 592, 58, 20, 0, 0, Math.PI * 2);
@@ -731,10 +771,12 @@ export function createScreens() {
       ctx.fill();
 
       // Sparkling Cider Mug at x = 725, y = 555
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
+      // Drop shadow
+      ctx.fillStyle = 'rgba(30, 10, 5, 0.35)';
       ctx.beginPath();
-      ctx.ellipse(735, 596, 20, 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(735, 600, 26, 10, 0, 0, Math.PI * 2);
       ctx.fill();
+
       ctx.fillStyle = '#E2E8F0';
       ctx.fillRect(723, 545, 24, 45);
       ctx.fillStyle = '#F59E0B';
@@ -752,9 +794,9 @@ export function createScreens() {
       const platterY = 485;
 
       // Soft shadow under platter
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+      ctx.fillStyle = 'rgba(30, 10, 5, 0.40)';
       ctx.beginPath();
-      ctx.ellipse(platterX, platterY + 16, 165, 28, 0, 0, Math.PI * 2);
+      ctx.ellipse(platterX, platterY + 18, 172, 32, 0, 0, Math.PI * 2);
       ctx.fill();
 
       // Large Polished Silver Platter
